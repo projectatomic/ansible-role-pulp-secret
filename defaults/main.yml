@@ -5,4 +5,4 @@
 
 pulp_secret_name: pulpsecret
 pulp_secret_service_account: builder
-pulp_secret_kubeconfig: /etc/openshift/master/admin.kubeconfig
+pulp_secret_kubeconfig: /etc/origin/master/admin.kubeconfig

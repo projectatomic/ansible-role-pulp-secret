@@ -43,7 +43,7 @@ can be set by the `pulp_secret_service_account` variable.
 We need a kubeconfig file on the remote machine in order to talk to OpenShift.
 Its location is contained in the `pulp_secret_kubeconfig`.
 
-    pulp_secret_kubeconfig: /etc/openshift/master/admin.kubeconfig
+    pulp_secret_kubeconfig: /etc/origin/master/admin.kubeconfig
 
 Example Playbook
 ----------------

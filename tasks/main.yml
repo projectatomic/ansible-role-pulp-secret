@@ -18,6 +18,13 @@
   copy: src={{ pulp_secret_local_dir }}/ dest={{ pulp_secret_remote_dir }}
   when: pulp_secret_local_dir is defined
 
+# can we use "oc replace" instead of the following two tasks?
+- name: delete old keys
+  command: oc delete secret {{ pulp_secret_name }}
+  environment:
+    KUBECONFIG: "{{ pulp_secret_kubeconfig }}"
+  failed_when: False
+
 - name: register keys to openshift
   command: oc secrets new {{ pulp_secret_name }} pulp.cer={{ pulp_secret_remote_dir }}/pulp.cer pulp.key={{ pulp_secret_remote_dir }}/pulp.key
   environment:

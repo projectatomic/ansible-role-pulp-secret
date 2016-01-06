@@ -15,20 +15,11 @@ and [issue tracker](https://github.com/projectatomic/ansible-osbs/issues).
 Role Variables
 --------------
 
-You can import the keys either from the machine running ansible or from the
-managed remote host. In the first case you have to set the
+The role imports the keys from the machine running ansible. You have to set the
 `pulp_secret_local_dir` variable to the directory containing the certificate
-and the key. The files in the directory will first be copied to temporary
-directory on the remote machine and then imported.
+and the key.
 
     pulp_secret_local_dir: /home/mmilata/.pulp
-
-If the keys are already present on the remote machine, set
-`pulp_secret_remote_dir` to the directory in question.
-
-    pulp_secret_remote_dir: /root/.pulp
-
-Please note that exactly one of these two variables has to be defined.
 
 The name of the secret in OpenShift is defined by the `pulp_secret_name`
 variable.
@@ -56,14 +47,6 @@ set of keys expires.
       roles:
          - role: pulp-secret
            pulp_secret_local_dir: /home/mmilata/.pulp
-
-Similar playbook from importing the keys directly from filesystem of the
-managed machine:
-
-    - hosts: builders
-      roles:
-         - role: pulp-secret
-           pulp_secret_remote_dir: /mnt/sync/pulp_secrets
 
 License
 -------

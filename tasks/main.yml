@@ -1,42 +1,38 @@
 ---
-- name: check that we only have one secret source defined
-  assert:
-    that:
-      - "pulp_secret_local_dir is defined or pulp_secret_remote_dir is defined"
-      - "not (pulp_secret_local_dir is defined and pulp_secret_remote_dir is defined)"
+# The way the files are read is retarded but I couldn't come up with any thing
+# better due to two ansible bugs:
+# - When ansible_sudo is defined in inventory, local_action tries to use sudo
+#   on the control host which doesn't make sense. Thus can't use local_action.
+# - If the file does not exist, lookup() fails the whole task fails even if
+#   ignore_errors/fail_when is used.
 
-- name: make temporary directory to store the keys
-  command: mktemp -d /tmp/tmp-pulp-secrets-XXXXXX
-  register: mktemp_result
-  when: pulp_secret_local_dir is defined
+- name: read cert from local directory
+  set_fact:
+    pulp_secret_cert_bits: "{{ lookup('file', item) }}"
+  with_first_found:
+  - "{{ pulp_secret_local_dir }}/pulp.cer"
+  - /dev/null
+  no_log: true
 
-- name: remember location of the temporary directory
-  set_fact: pulp_secret_remote_dir={{ mktemp_result.stdout }}
-  when: pulp_secret_local_dir is defined
+- name: read key from local directory
+  set_fact:
+    pulp_secret_key_bits: "{{ lookup('file', item) }}"
+  with_first_found:
+  - "{{ pulp_secret_local_dir }}/pulp.key"
+  - /dev/null
+  no_log: true
 
-- name: copy the keys to remote host
-  copy: src={{ pulp_secret_local_dir }}/ dest={{ pulp_secret_remote_dir }}
-  when: pulp_secret_local_dir is defined
+- fail:
+    msg: Pulp secrets not found (and pulp_secret_can_fail is false)
+  when: (pulp_secret_cert_bits == '' or pulp_secret_key_bits == '') and not pulp_secret_can_fail
 
-# can we use "oc replace" instead of the following two tasks?
-- name: delete old keys
-  command: oc delete secret {{ pulp_secret_name }}
-  environment:
-    KUBECONFIG: "{{ pulp_secret_kubeconfig }}"
-  failed_when: False
+- debug:
+    msg: Pulp secrets not found, skipping import
+  when: pulp_secret_cert_bits == '' or pulp_secret_key_bits == ''
 
-- name: register keys to openshift
-  command: oc secrets new {{ pulp_secret_name }} pulp.cer={{ pulp_secret_remote_dir }}/pulp.cer pulp.key={{ pulp_secret_remote_dir }}/pulp.key
-  environment:
-    KUBECONFIG: "{{ pulp_secret_kubeconfig }}"
-  register: command_result
-  failed_when: "command_result | failed and 'already exists' not in command_result.stderr"
-
-- name: allow service account to access the secret
-  command: oc secrets add serviceaccount/{{ pulp_secret_service_account }} secrets/{{ pulp_secret_name }} --for=mount
-  environment:
-    KUBECONFIG: "{{ pulp_secret_kubeconfig }}"
-
-- name: delete the temporary directory
-  file: path={{ pulp_secret_remote_dir }} state=absent
-  when: pulp_secret_local_dir is defined
+- name: create secrets resource file
+  template: src=openshift-pulpsecret.yml.j2 dest={{ pulp_secret_remote_dir }}/openshift-pulpsecret.yml mode="0600"
+  when: pulp_secret_cert_bits != '' and pulp_secret_key_bits != ''
+  notify:
+  - import pulp keys
+  - delete resource file

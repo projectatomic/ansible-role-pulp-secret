@@ -1,8 +1,9 @@
 ---
-# Exactly one of these options has to be defined
+# Required
 #pulp_secret_local_dir: /home/user/.pulp
-#pulp_secret_remote_dir: /root/.pulp
 
 pulp_secret_name: pulpsecret
 pulp_secret_service_account: builder
 pulp_secret_kubeconfig: /etc/openshift/master/admin.kubeconfig
+pulp_secret_remote_dir: /var/lib/openshift
+pulp_secret_can_fail: false

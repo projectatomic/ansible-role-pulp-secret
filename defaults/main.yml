@@ -7,3 +7,5 @@ pulp_secret_service_account: builder
 pulp_secret_kubeconfig: /etc/origin/master/admin.kubeconfig
 pulp_secret_remote_dir: /var/lib/origin
 pulp_secret_can_fail: false
+
+pulp_secret_namespace: default

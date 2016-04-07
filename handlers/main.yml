@@ -1,12 +1,20 @@
 ---
 - name: import pulp keys
-  command: oc replace --force=true --filename={{ pulp_secret_remote_dir }}/openshift-pulpsecret.yml
+  command: >
+    oc replace
+    --namespace={{ pulp_secret_namespace }}
+    --force=true
+    --filename={{ pulp_secret_remote_dir }}/openshift-pulpsecret.yml
   environment:
     KUBECONFIG: "{{ pulp_secret_kubeconfig }}"
   notify: allow service account
 
 - name: allow service account
-  command: oc secrets add serviceaccount/{{ pulp_secret_service_account }} secrets/{{ pulp_secret_name }} --for=mount
+  command: >
+    oc secrets
+    add serviceaccount/{{ pulp_secret_service_account }} secrets/{{ pulp_secret_name }}
+    --for=mount
+    --namespace={{ pulp_secret_namespace }}
   environment:
     KUBECONFIG: "{{ pulp_secret_kubeconfig }}"
 

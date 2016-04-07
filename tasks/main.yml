@@ -13,6 +13,8 @@
   - "{{ pulp_secret_local_dir }}/pulp.cer"
   - /dev/null
   no_log: true
+  tags:
+  - oc
 
 - name: read key from local directory
   set_fact:
@@ -21,14 +23,20 @@
   - "{{ pulp_secret_local_dir }}/pulp.key"
   - /dev/null
   no_log: true
+  tags:
+  - oc
 
 - fail:
     msg: Pulp secrets not found (and pulp_secret_can_fail is false)
   when: (pulp_secret_cert_bits == '' or pulp_secret_key_bits == '') and not pulp_secret_can_fail
+  tags:
+  - oc
 
 - debug:
     msg: Pulp secrets not found, skipping import
   when: pulp_secret_cert_bits == '' or pulp_secret_key_bits == ''
+  tags:
+  - oc
 
 - name: create secrets resource file
   template: src=openshift-pulpsecret.yml.j2 dest={{ pulp_secret_remote_dir }}/openshift-pulpsecret.yml mode="0600"
@@ -36,3 +44,5 @@
   notify:
   - import pulp keys
   - delete resource file
+  tags:
+  - oc

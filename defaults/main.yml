@@ -9,3 +9,5 @@ pulp_secret_remote_dir: /var/lib/origin
 pulp_secret_can_fail: false
 
 pulp_secret_namespace: default
+pulp_secret_environment:
+  KUBECONFIG: "{{ pulp_secret_kubeconfig }}"

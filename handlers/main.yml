@@ -5,8 +5,7 @@
     --namespace={{ pulp_secret_namespace }}
     --force=true
     --filename={{ pulp_secret_remote_dir }}/openshift-pulpsecret.yml
-  environment:
-    KUBECONFIG: "{{ pulp_secret_kubeconfig }}"
+  environment: "{{ pulp_secret_environment }}"
   notify: allow service account
 
 - name: allow service account
@@ -15,8 +14,7 @@
     add serviceaccount/{{ pulp_secret_service_account }} secrets/{{ pulp_secret_name }}
     --for=mount
     --namespace={{ pulp_secret_namespace }}
-  environment:
-    KUBECONFIG: "{{ pulp_secret_kubeconfig }}"
+  environment: "{{ pulp_secret_environment }}"
 
 - name: delete resource file
   file: path={{ pulp_secret_remote_dir }}/openshift-pulpsecret.yml state=absent

@@ -22,11 +22,13 @@
   - /dev/null
   no_log: true
 
-- fail:
+- name: Fail when pulp secrets are not found
+  fail:
     msg: Pulp secrets not found (and pulp_secret_can_fail is false)
   when: (pulp_secret_cert_bits == '' or pulp_secret_key_bits == '') and not pulp_secret_can_fail
 
-- debug:
+- name: Warn user when pulp secrets weren't found
+  debug:
     msg: Pulp secrets not found, skipping import
   when: pulp_secret_cert_bits == '' or pulp_secret_key_bits == ''
 
